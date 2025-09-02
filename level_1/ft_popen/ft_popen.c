@@ -1,0 +1,42 @@
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+int	ft_popen(const char *file, char *const argv[], char type)
+{
+    if(!file || (type != 'r' && type != 'w'))
+        return -1;
+    int pid;
+    int fd[2];
+    if(pipe(fd) == -1)
+        return -1;
+    if(type == 'w')
+    {
+        pid = fork();
+        if(pid == 0)
+        {
+            dup2(fd[1] , 0);
+            close(fd[1]);
+            close(fd[0]);
+            execvp(file , argv);
+            exit(-1);
+        }
+        close(fd[1]);
+        return (fd[0]);
+    }
+    if(type == 'r')
+    {
+         pid = fork();
+        if(pid == 0)
+        {
+            dup2(fd[0] , 0);
+            close(fd[1]);
+            close(fd[0]);
+            execvp(file , argv);
+            exit(-1);
+        }
+        close(fd[0]);
+        return (fd[1]);
+    }
+    return(-1);
+}
