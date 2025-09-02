@@ -25,14 +25,13 @@ int pico(char **cmd[])
                 dup2(fd[1] , 1);
                 close(fd[1]);
             }
+            if(p != -1)
+                close(p);
             execvp(cmd[i][0] , cmd[i]);
             exit(1);
         }
         if(p != -1)
-        {
             close(p);
-            p = -1;
-        }
         if(cmd[i + 1])
         {
             close(fd[1]);
@@ -52,7 +51,6 @@ int pico(char **cmd[])
     return (0);
 }
 
-/*
 
 int main()
 {
@@ -61,4 +59,4 @@ int main()
     char *wc[] = {"wc" , "-l" , NULL};
     char **arg[] = {ls , cat ,wc, NULL};
     pico(arg);
-}*/
+}

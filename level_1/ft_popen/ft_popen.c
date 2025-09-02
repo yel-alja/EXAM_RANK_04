@@ -4,39 +4,55 @@
 
 int	ft_popen(const char *file, char *const argv[], char type)
 {
-    if(!file || (type != 'r' && type != 'w'))
-        return -1;
+    int pipefd[2];
     int pid;
-    int fd[2];
-    if(pipe(fd) == -1)
-        return -1;
-    if(type == 'w')
+
+    pipe(pipefd);
+    pid = fork();
+    if(!pid)
     {
-        pid = fork();
-        if(pid == 0)
+        if(type == 'r')
         {
-            dup2(fd[1] , 0);
-            close(fd[1]);
-            close(fd[0]);
-            execvp(file , argv);
-            exit(-1);
+            close(pipefd[0]);
+            dup2(pipefd[1] , 1);
+            close(pipefd[1]);
         }
-        close(fd[1]);
-        return (fd[0]);
+        if(type == 'w')
+        {
+            close(pipefd[1]);
+            dup2(pipefd[0] , 0);
+            close(pipefd[0]);
+        }
+        execvp(file , argv);
+        exit(-1);
     }
     if(type == 'r')
     {
-         pid = fork();
-        if(pid == 0)
-        {
-            dup2(fd[0] , 0);
-            close(fd[1]);
-            close(fd[0]);
-            execvp(file , argv);
-            exit(-1);
-        }
-        close(fd[0]);
-        return (fd[1]);
+        close(pipefd[1]);
+        return(pipefd[0]);
     }
-    return(-1);
+    if(type == 'w')
+    {
+        close(pipefd[0]);
+        return(pipefd[1]);
+    }
+    return -1;
+}
+
+int main(void) {
+    char buf[1000];
+    char *argv[] = {"ls", "-la", NULL};
+
+    int fd = ft_popen("ls", argv, 'r');
+    if (fd == -1) {
+        return 1;
+    }
+
+    int n = read(fd, buf, sizeof(buf) - 1);
+    if (n > 0) {
+        buf[n] = '\0';
+        printf("%s\n", buf);
+    }
+
+    return 0;
 }
