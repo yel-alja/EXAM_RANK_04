@@ -14,7 +14,7 @@ int	ft_popen(const char *file, char *const argv[], char type)
         if(type == 'r')
         {
             close(pipefd[0]);
-            dup2(pipefd[1] , 1);
+            dup2(pipefd[1], 1);
             close(pipefd[1]);
         }
         if(type == 'w')

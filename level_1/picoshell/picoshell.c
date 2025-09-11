@@ -1,17 +1,17 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <stdlib.h>
-int pico(char **cmd[])
+int picoshell(char **cmd[])
 {
     int i = 0;
     int p = -1;
     int fd[2];
     int pid;
-
+ 
     while(cmd[i])
     {
         if(cmd[i + 1] && pipe(fd))
-            return 1;
+            return -1;
         pid = fork();
         if(pid == 0)
         {
@@ -25,13 +25,11 @@ int pico(char **cmd[])
                 dup2(fd[1] , 1);
                 close(fd[1]);
             }
-            if(p != -1)
-                close(p);
             execvp(cmd[i][0] , cmd[i]);
             exit(1);
         }
         if(p != -1)
-            close(p);
+            close(p); 
         if(cmd[i + 1])
         {
             close(fd[1]);
@@ -51,12 +49,11 @@ int pico(char **cmd[])
     return (0);
 }
 
-
 int main()
 {
     char *ls[] = {"ls" , "-la" , NULL};
     char *cat[] = {"cat" , "-e" , NULL};
     char *wc[] = {"wc" , "-l" , NULL};
-    char **arg[] = {ls , cat ,wc, NULL};
-    pico(arg);
+    char **cmd[] = {ls , cat ,wc, NULL};
+    picoshell(cmd);
 }
