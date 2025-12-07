@@ -25,6 +25,12 @@ int picoshell(char **cmd[])
                 dup2(fd[1] , 1);
                 close(fd[1]);
             }
+            int j = 3;
+            while(j < 1024)
+            {
+                close(j);
+                j++;   
+            }
             execvp(cmd[i][0] , cmd[i]);
             exit(1);
         }
